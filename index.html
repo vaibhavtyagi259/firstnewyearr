@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our First New Year ❤️</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Georgia',serif;}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#ff4b7d,#ff7eb3,#ffd700);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* ---------- COMMON CARD ---------- */
+.card{
+  width:95%;
+  max-width:430px;
+  background:rgba(255,255,255,0.18);
+  backdrop-filter:blur(14px);
+  border-radius:30px;
+  padding:30px;
+  text-align:center;
+  box-shadow:0 25px 60px rgba(0,0,0,0.35);
+  display:none;
+}
+.card.active{display:block;}
+
+h1{margin-bottom:10px;}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:30px;
+  font-size:18px;
+  background:linear-gradient(135deg,#ff0033,#ffcc00);
+  color:#fff;
+  cursor:pointer;
+}
+
+/* ---------- SHAYARI ---------- */
+.shayari p{
+  font-size:18px;
+  line-height:1.8;
+}
+
+/* ---------- GAME ---------- */
+.game-area{
+  height:260px;
+  margin:15px 0;
+  border-radius:20px;
+  background:rgba(255,255,255,0.15);
+  position:relative;
+  overflow:hidden;
+}
+
+.heart{
+  position:absolute;
+  font-size:42px;
+  cursor:pointer;
+  animation:fall 3s linear;
+}
+
+@keyframes fall{
+  from{top:-50px;}
+  to{top:280px;}
+}
+
+/* ---------- POPUPS ---------- */
+.popup,.ending{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+
+/* ---------- PROPOSAL ---------- */
+.popup-box{
+  background:linear-gradient(135deg,#ff5f9e,#ffd700);
+  padding:30px;
+  border-radius:30px;
+  text-align:center;
+  animation:pop .6s ease;
+}
+@keyframes pop{
+  from{transform:scale(.5);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+/* ---------- ENDING ---------- */
+.ending{
+  flex-direction:column;
+  color:#ffd700;
+}
+.stars{
+  position:absolute;
+  inset:0;
+  background:url("https://raw.githubusercontent.com/vaibhavtyagi259/assets/main/stars.gif");
+  background-size:cover;
+  opacity:0.6;
+}
+
+.ending-content{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  animation:fade 4s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+.ending img{
+  width:130px;
+  height:130px;
+  border-radius:50%;
+  object-fit:cover;
+  margin:20px 0;
+  border:3px solid #ffd700;
+  opacity:0;
+  animation:photo 3s ease forwards;
+  animation-delay:2s;
+}
+
+@keyframes photo{
+  to{opacity:1;}
+}
+
+/* ---------- FIREWORK ---------- */
+.firework{
+  position:fixed;
+  width:6px;
+  height:6px;
+  background:#ffd700;
+  border-radius:50%;
+  animation:boom 1s ease-out forwards;
+}
+
+@keyframes boom{
+  from{opacity:1;}
+  to{transform:translate(var(--x),var(--y));opacity:0;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎵 BACKGROUND MUSIC -->
+<audio id="bgMusic" autoplay loop>
+  <source src="https://youtube.com/shorts/eDWwuWGbSCY?si=4BkfBfif0XGtknHe">
+</audio>
+
+<!-- 💓 HEARTBEAT -->
+<audio id="beat">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-heartbeat-fast-33.mp3">
+</audio>
+
+<!-- ---------- PAGE 1 : SHAYARI ---------- -->
+<div id="page1" class="card active shayari">
+  <h1>💖 For You 💖</h1>
+  <p>
+    Naye saal ki pehli subah ho tum,<br>
+    Har khushi ki wajah ho tum ❤️<br><br>
+    Jo saath ho tum har pal mere,<br>
+    Toh zindagi khud ek dua ho tum ✨
+  </p>
+  <br>
+  <button onclick="nextPage()">Next ❤️</button>
+</div>
+
+<!-- ---------- PAGE 2 : GAME ---------- -->
+<div id="page2" class="card">
+  <h1>💘 Catch the Hearts 💘</h1>
+  <p>Score 30 to unlock something special 💍</p>
+
+  <div class="game-area" id="game"></div>
+
+  <p>Score: <b id="score">0</b> | Time: <b id="time">30</b></p>
+  <button onclick="startGame()">Start Game ❤️</button>
+</div>
+
+<!-- ---------- PROPOSAL ---------- -->
+<div id="proposal" class="popup">
+  <div class="popup-box">
+    <h2>💍 Will you be mine forever?</h2>
+    <button onclick="accept()">YES ❤️</button>
+  </div>
+</div>
+
+<!-- ---------- ENDING ---------- -->
+<div id="ending" class="ending">
+  <div class="stars"></div>
+  <div class="ending-content">
+    <h1>✨ THE END ✨</h1>
+
+    <!-- 📸 HER PHOTO -->
+    <img src="gf.jpg" alt="My Forever ❤️">
+
+    <p>
+      Not of our story…<br>
+      But of this chapter 💖<br><br>
+      Forever starts with us ❤️
+    </p>
+  </div>
+</div>
+
+<script>
+let score=0,time=30,gameInt,timer;
+const beat=document.getElementById("beat");
+const bgMusic=document.getElementById("bgMusic");
+
+function nextPage(){
+  page1.classList.remove("active");
+  page2.classList.add("active");
+}
+
+function startGame(){
+  score=0; time=30;
+  document.getElementById("score").innerText=score;
+  document.getElementById("time").innerText=time;
+  game.innerHTML="";
+  gameInt=setInterval(dropHeart,700);
+  timer=setInterval(()=>{
+    time--;
+    document.getElementById("time").innerText=time;
+    if(time<=0){
+      clearInterval(gameInt);
+      clearInterval(timer);
+      endGame();
+    }
+  },1000);
+}
+
+function dropHeart(){
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerHTML="💖";
+  h.style.left=Math.random()*80+"%";
+  h.onclick=()=>hit(h);
+  game.appendChild(h);
+  setTimeout(()=>h.remove(),3000);
+}
+
+function hit(h){
+  score++;
+  document.getElementById("score").innerText=score;
+  beat.playbackRate=Math.min(1+score/20,2.5);
+  beat.currentTime=0;
+  beat.play();
+  if(navigator.vibrate) navigator.vibrate(40);
+  h.remove();
+}
+
+function endGame(){
+  if(score>=30){
+    fireworks();
+    setTimeout(()=>proposal.style.display="flex",1000);
+  }else{
+    alert("Score 30 to unlock 💍");
+  }
+}
+
+function fireworks(){
+  for(let i=0;i<60;i++){
+    const f=document.createElement("div");
+    f.className="firework";
+    f.style.left=Math.random()*100+"vw";
+    f.style.top=Math.random()*100+"vh";
+    f.style.setProperty("--x",(Math.random()*200-100)+"px");
+    f.style.setProperty("--y",(Math.random()*200-100)+"px");
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),1000);
+  }
+}
+
+function accept(){
+  proposal.style.display="none";
+  fadeOutMusic();
+  setTimeout(()=>ending.style.display="flex",800);
+}
+
+function fadeOutMusic(){
+  let vol=1;
+  const fade=setInterval(()=>{
+    vol-=0.05;
+    bgMusic.volume=Math.max(vol,0);
+    if(vol<=0) clearInterval(fade);
+  },200);
+}
+</script>
+
+</body>
+</html>
